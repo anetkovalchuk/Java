@@ -1,0 +1,114 @@
+import java.util.*;
+
+abstract class Gem {
+    protected String name;
+    protected double weightCarats; 
+    protected double transparency; 
+    protected double baseValue; 
+
+    public Gem(String name, double weightCarats, double transparency, double baseValue) {
+        this.name = name;
+        this.weightCarats = weightCarats;
+        this.transparency = transparency;
+        this.baseValue = baseValue;
+    }
+
+    public double getWeightCarats() { return weightCarats; }
+    public double getTransparency() { return transparency; }
+    public String getName() { return name; }
+
+    public abstract double getPrice();
+
+    @Override
+    public String toString() {
+        return String.format("%s [%.2f карат, прозорість=%.2f, ціна=%.2f]", name, weightCarats, transparency, getPrice());
+    }
+}
+
+class PreciousGem extends Gem {
+    public PreciousGem(String name, double weightCarats, double transparency, double baseValue) {
+        super(name, weightCarats, transparency, baseValue);
+    }
+
+    @Override
+    public double getPrice() {
+        return baseValue * weightCarats * (1 + transparency);
+    }
+}
+class SemiPreciousGem extends Gem {
+    public SemiPreciousGem(String name, double weightCarats, double transparency, double baseValue) {
+        super(name, weightCarats, transparency, baseValue);
+    }
+
+    @Override
+    public double getPrice() {
+        return baseValue * weightCarats * (0.5 + transparency/2);
+    }
+}
+
+class Necklace {
+    private List<Gem> gems;
+
+    public Necklace() {
+        gems = new ArrayList<>();
+    }
+
+    public void addGem(Gem gem) {
+        gems.add(gem);
+    }
+
+    public double totalWeight() {
+        double sum = 0;
+        for (Gem g : gems) sum += g.getWeightCarats();
+        return sum;
+    }
+
+    public double totalPrice() {
+        double sum = 0;
+        for (Gem g : gems) sum += g.getPrice();
+        return sum;
+    }
+
+    public void sortByPrice() {
+        gems.sort(Comparator.comparingDouble(Gem::getPrice));
+    }
+
+    public List<Gem> findByTransparency(double min, double max) {
+        List<Gem> result = new ArrayList<>();
+        for (Gem g : gems) {
+            if (g.getTransparency() >= min && g.getTransparency() <= max) {
+                result.add(g);
+            }
+        }
+        return result;
+    }
+
+    public void printNecklace() {
+        for (Gem g : gems) System.out.println(g);
+    }
+}
+
+public class GemsExample {
+    public static void main(String[] args) {
+        Necklace necklace = new Necklace();
+
+        necklace.addGem(new PreciousGem("Діамант", 1.2, 0.95, 5000));
+        necklace.addGem(new PreciousGem("Рубін", 2.0, 0.80, 3000));
+        necklace.addGem(new SemiPreciousGem("Аметист", 3.5, 0.70, 500));
+        necklace.addGem(new SemiPreciousGem("Топаз", 2.8, 0.60, 700));
+
+        System.out.println("Склад намиста:");
+        necklace.printNecklace();
+
+        System.out.printf("\nЗагальна вага: %.2f карат\n", necklace.totalWeight());
+        System.out.printf("Загальна вартість: %.2f\n", necklace.totalPrice());
+
+        System.out.println("\nСортування за ціною:");
+        necklace.sortByPrice();
+        necklace.printNecklace();
+
+        System.out.println("\nКамені з прозорістю від 0.7 до 0.9:");
+        List<Gem> filtered = necklace.findByTransparency(0.7, 0.9);
+        for (Gem g : filtered) System.out.println(g);
+    }
+}
